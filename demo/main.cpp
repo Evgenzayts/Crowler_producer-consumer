@@ -16,7 +16,7 @@ struct Arguments {
   size_t parser_threads;
 };
 
-void parse_console(int argc,char *argv[], Arguments& arg){
+void parse_console(int argc,char *argv[], Arguments& arguments){
   // options_description - класс, объявляющий разрешённые опции.
   // add_options - метод этого класса, который возвращает
   // специальный прокси-объект, определяющий operator().
@@ -26,11 +26,16 @@ void parse_console(int argc,char *argv[], Arguments& arg){
     po::options_description desc{"Arguments"};
     desc.add_options()
         ("help", "Help screen")
-          ("url", po::value<std::string>())
-            ("output", po::value<std::string>())
-               ("depth",po::value<size_t>())
-                    ("network_threads",po::value<size_t>())
-                        ("parser_threads",po::value<size_t>());
+          ("url", po::value<std::string>(),
+              "Input url")
+            ("output", po::value<std::string>(),
+                "Name of output file")
+               ("depth",po::value<size_t>(),
+                   "Depth of search by page")
+                    ("network_threads",po::value<size_t>(),
+                        "Count of threads for downloading")
+                        ("parser_threads",po::value<size_t>(),
+                            "Count of threads for processing");
 
     po::variables_map vm; // аналогично std::map
     store(parse_command_line(argc, argv, desc), vm);
@@ -43,11 +48,11 @@ void parse_console(int argc,char *argv[], Arguments& arg){
         && vm.count("depth")
         && vm.count("network_threads")
         && vm.count("parser_threads")) {
-      arg.url = vm["url"].as<std::string>();
-      arg.output = vm["output"].as<std::string>();
-      arg.depth = vm["depth"].as<size_t>();
-      arg.network_threads = vm["network_threads"].as<size_t>();
-      arg.parser_threads = vm["parser_threads"].as<size_t>();
+      arguments.url = vm["url"].as<std::string>();
+      arguments.output = vm["output"].as<std::string>();
+      arguments.depth = vm["depth"].as<size_t>();
+      arguments.network_threads = vm["network_threads"].as<size_t>();
+      arguments.parser_threads = vm["parser_threads"].as<size_t>();
     } else {
       throw boost::program_options::error(
           "Invalid arguments\n"
@@ -59,13 +64,16 @@ void parse_console(int argc,char *argv[], Arguments& arg){
 }
 
 int main(int argc, char* argv[]) {
-  Arguments arg;
-  parse_console(argc, argv, arg);
+  Arguments arguments;
+  parse_console(argc, argv, arguments);
 
-  //Producer p(arg.network_threads);
-  //Consumer k(arg.parser_threads);
-
-  //crawler(arg.url,arg.depth,k, p, arg.output, p.parser_queue_);
+  try {
+    //Producer p(arguments.network_threads);
+    //Consumer k(arguments.parser_threads);
+    //crawler(arguments.url,arguments.depth,k, p, arguments.output, p.parser_queue_);
+  } catch (std::exception const& exception) {
+    std::cerr << exception.what() << std::endl;
+  }
 
   return 0;
 }
