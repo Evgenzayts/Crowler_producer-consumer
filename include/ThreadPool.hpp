@@ -35,14 +35,17 @@
 class ThreadPool {
  public:
   ThreadPool(size_t);
+
   template<class F, class... Args>
   auto enqueue(F&& f, Args&&... args)
       -> std::future<typename std::result_of<F(Args...)>::type>;
+
   ~ThreadPool();
+
  private:
-  // need to keep track of threads so we can join them
+  //нужно отслеживать потоки, чтобы мы могли присоединиться к ним
   std::vector< std::thread > workers;
-  // the task queue
+  // очередь задач
   std::queue< std::function<void()> > tasks;
 
   // synchronization
@@ -79,7 +82,7 @@ inline ThreadPool::ThreadPool(size_t threads)
     );
 }
 
-// add new work item to the pool
+// добавление нового рабочего элемента в пул
 template<class F, class... Args>
 auto ThreadPool::enqueue(F&& f, Args&&... args)
     -> std::future<typename std::result_of<F(Args...)>::type>
@@ -94,7 +97,7 @@ auto ThreadPool::enqueue(F&& f, Args&&... args)
   {
     std::unique_lock<std::mutex> lock(queue_mutex);
 
-    // don't allow enqueueing after stopping the pool
+    // запрет на постановку в очередь после остановки пула
     if(stop)
       throw std::runtime_error("enqueue on stopped ThreadPool");
 
@@ -104,7 +107,7 @@ auto ThreadPool::enqueue(F&& f, Args&&... args)
   return res;
 }
 
-// the destructor joins all threads
+// деструктор объединяет потоки
 inline ThreadPool::~ThreadPool()
 {
   {

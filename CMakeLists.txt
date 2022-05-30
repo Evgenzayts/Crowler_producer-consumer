@@ -34,8 +34,8 @@ find_package(Beast CONFIG REQUIRED)
 hunter_add_package(gumbo)
 find_package(gumbo CONFIG REQUIRED)
 
-#hunter_add_package(OpenSSL)
-#find_package(OpenSSL REQUIRED)
+hunter_add_package(OpenSSL)
+find_package(OpenSSL REQUIRED)
 
 hunter_add_package(Boost COMPONENTS
         thread
@@ -50,7 +50,15 @@ find_package(Boost CONFIG REQUIRED
 
 add_library(${PROJECT_NAME} STATIC
   ${CMAKE_CURRENT_SOURCE_DIR}/sources/example.cpp
-        sources/Producer.cpp include/Producer.hpp include/ThreadPool.hpp)
+        sources/Producer.cpp
+        include/Producer.hpp
+        include/ThreadPool.hpp
+        sources/Consumer.cpp
+        include/Consumer.hpp
+        include/RootCertificates.hpp
+        include/Queue.hpp
+        sources/Crawler.cpp
+        include/Crawler.hpp)
 
 add_executable(demo
   ${CMAKE_CURRENT_SOURCE_DIR}/demo/main.cpp
@@ -69,8 +77,8 @@ target_link_libraries(${PROJECT_NAME}
         Boost::program_options
         Beast::Beast
         gumbo::gumbo
-        #OpenSSL::SSL
-        #OpenSSL::Crypto
+        OpenSSL::SSL
+        OpenSSL::Crypto
         )
 
 if(BUILD_TESTS)
