@@ -5,8 +5,10 @@
 void start(Arguments& arguments, Consumer& consumer, Producer& producer) {
   auto temp_depth = arguments.depth;
 
-  GumboOutput* out = gumbo_parse(
-      producer.Download_page(arguments.url).c_str());
+  producer.Take_host(arguments.url);
+  producer.Take_target(arguments.url);
+
+  GumboOutput* out = gumbo_parse(producer.Download_page().c_str());
   // подгружаем ссылки с начальной страницы
   producer.Search_for_links(out->root);
   gumbo_destroy_output(&kGumboDefaultOptions, out);
@@ -15,8 +17,8 @@ void start(Arguments& arguments, Consumer& consumer, Producer& producer) {
   consumer.Working(arguments.output, producer._queue);
   --temp_depth;
 
-  //переходим на следующую страницу, пока не достигнут предел глубины
-  while (temp_depth > 0){
+  // переходим на следующую страницу, пока не достигнут предел глубины
+  while (temp_depth > 0) {
     --temp_depth;
     producer.Download_next();
     consumer.Working(arguments.output, producer._queue);

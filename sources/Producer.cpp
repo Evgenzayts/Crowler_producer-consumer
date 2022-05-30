@@ -8,11 +8,11 @@ void Producer::Search_for_links(GumboNode* node) {
   }
 
   // Структура, представляющая один атрибут в теге HTML
-  GumboAttribute* href;
+  /*GumboAttribute* href;
   if (node->v.element.tag == GUMBO_TAG_A &&
       (href = gumbo_get_attribute(&node->v.element.attributes, "href"))) {
     std::cout << href->value << std::endl;
-  }
+  }*/
 
   // загружаем все дочерние ссылки
   GumboVector* children = &node->v.element.children;
@@ -21,14 +21,10 @@ void Producer::Search_for_links(GumboNode* node) {
   }
 }
 
-Producer::Producer(size_t& threads)
-    : _threads(threads) {}
+Producer::Producer(size_t& threads) : _threads(threads) {}
 
-std::string Producer::Download_page(std::string& url) {
+std::string Producer::Download_page() {
   try {
-    Take_host(url);
-    Take_target(url);
-
     boost::asio::io_context ioc;
     // объект контекста SSL используется
     // для установки параметров SSL: режим проверки,
@@ -49,20 +45,17 @@ std::string Producer::Download_page(std::string& url) {
     auto const results =
         resolver.resolve(_info_connect.host, _info_connect.port);
 
-    boost::asio::connect(stream.next_layer(),
-                         results.begin(),
-                         results.end());
+    boost::asio::connect(stream.next_layer(), results.begin(), results.end());
 
-    //Устанавливаем SSL соединенение
+    // Устанавливаем SSL соединенение
     stream.handshake(ssl::stream_base::client);
 
     // Настройка HTTP-запроса на получение сообщения
-    http::request<http::string_body> request{http::verb::get,
-                                             _info_connect.target,
-                                             _info_connect.version};
+    http::request<http::string_body> request{
+        http::verb::get, _info_connect.target, _info_connect.version};
     request.set(http::field::host, _info_connect.host);
     request.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-    http::write(stream, request); // Отправить HTTP-запрос
+    http::write(stream, request);  // Отправить HTTP-запрос
 
     boost::beast::flat_buffer buffer;
     http::response<http::string_body> response;
@@ -78,7 +71,7 @@ std::string Producer::Download_page(std::string& url) {
     _queue.push(response.body());
 
     return response.body();
-  } catch (std::exception const& e){
+  } catch (std::exception const& e) {
     std::cerr << e.what() << std::endl;
   }
 
@@ -87,7 +80,7 @@ std::string Producer::Download_page(std::string& url) {
 
 void Producer::Download_next() {
   size_t counts = _my_urls.size();
-  for (size_t i = 0; i < counts; ++i){
+  for (size_t i = 0; i < counts; ++i) {
     GumboOutput* out = gumbo_parse(_my_urls[i].get().c_str());
     // root - указатель на корневой узел. Это тег,
     // который формирует корень документа.
@@ -100,18 +93,10 @@ void Producer::Download_next() {
 void Producer::Take_host(std::string& url) {
   std::string temp = url;
 
-  if (url.find("https://") == 0)
-    temp = url.substr(8);
+  if (url.find("https://") == 0) temp = url.substr(8);
 
   for (char sym : temp) {
-    static bool check = false;
-    if (sym == '/') {
-      if (check)
-        break;
-
-      check = true;
-      continue;
-    }
+    if (sym == '/') break;
 
     _info_connect.host += sym;
   }
@@ -120,19 +105,15 @@ void Producer::Take_host(std::string& url) {
 void Producer::Take_target(std::string& url) {
   std::string temp = url;
 
-  if (url.find("https:") == 0)
-    temp = url.substr(8);
+  if (url.find("https:") == 0) temp = url.substr(8);
 
   size_t end_host = 0;
   for (; end_host < temp.size(); ++end_host) {
-    if (temp[end_host] == '/')
-      break;
+    if (temp[end_host] == '/') break;
   }
 
   for (size_t i = end_host; i < temp.size(); ++i) {
     _info_connect.target += temp[i];
   }
 }
-MyConnect Producer::Get_info() {
-  return _info_connect;
-}
+MyConnect Producer::Get_info() { return _info_connect; }

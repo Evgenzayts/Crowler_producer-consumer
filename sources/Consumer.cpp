@@ -5,7 +5,7 @@
 Consumer::Consumer(size_t& threads) : _threads_links(threads) {}
 
 void Consumer::Working(std::string& output_file, Queue& producer_queue) {
-  //в пул потоков парсера забираем задачи из producer_queue
+  // в пул потоков парсера забираем задачи из producer_queue
   while (true) {
     if (producer_queue.empty()) {
       sleep(2);
@@ -15,10 +15,10 @@ void Consumer::Working(std::string& output_file, Queue& producer_queue) {
         continue;
     }
 
-    //помещаем в пул все картинки
+    // помещаем в пул все картинки
     _threads_links.enqueue(&Consumer::Search_for_images, this,
-                        gumbo_parse(producer_queue.front().c_str())->root);
-    //снимаем задачу
+                           gumbo_parse(producer_queue.front().c_str())->root);
+    // снимаем задачу
     producer_queue.pop();
   }
 
@@ -26,8 +26,7 @@ void Consumer::Working(std::string& output_file, Queue& producer_queue) {
 }
 
 void Consumer::Write_in_file(std::string& output_file) {
-  std::ofstream file;
-  file.open(output_file);
+  std::ofstream file(output_file, std::ios::app);
 
   while (true) {
     if (_queue.empty()) {
@@ -53,7 +52,7 @@ void Consumer::Search_for_images(GumboNode* node) {
   // Это пара имя-значение, но также включает в себя информацию
   // о местоположении источника и исходном исходном тексте
   GumboAttribute* src = nullptr;
-  //проверяем что это изображение
+  // проверяем что это изображение
   if (node->v.element.tag == GUMBO_TAG_IMG &&
       (src = gumbo_get_attribute(&node->v.element.attributes, "src"))) {
     std::string str = src->value;

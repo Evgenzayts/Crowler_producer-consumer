@@ -11,20 +11,17 @@
 #define INCLUDE_ROOTCERTIFICATES_HPP_
 
 #include <boost/asio/ssl.hpp>
-
 #include <string>
 
-namespace ssl = boost::asio::ssl; // from <boost/asio/ssl.hpp>
+namespace ssl = boost::asio::ssl;  // from <boost/asio/ssl.hpp>
 namespace detail {
 
 // The template argument is gratuituous, to
 // allow the implementation to be header-only.
 //
 
-template<class = void>
-void
-load_root_certificates(ssl::context& ctx, boost::system::error_code& ec)
-{
+template <class = void>
+void load_root_certificates(ssl::context& ctx, boost::system::error_code& ec) {
   std::string const cert =
       /*  This is the DigiCert root certificate.
           CN = DigiCert High Assurance EV Root CA
@@ -58,22 +55,19 @@ load_root_certificates(ssl::context& ctx, boost::system::error_code& ec)
       "vEsXCS+0yx5DaMkHJ8HSXPfqIbloEpw8nL+e/IBcm2PN7EeqJSdnoDfzAIJ9VNep\n"
       "+OkuE6N36B9K\n"
       "-----END CERTIFICATE-----\n";
-  ctx.add_certificate_authority(
-      boost::asio::buffer(cert.data(), cert.size()), ec);
+  ctx.add_certificate_authority(boost::asio::buffer(cert.data(), cert.size()),
+                                ec);
   if (ec) return;
 }
-} // namespace detail
+}  // namespace detail
 inline void load_root_certificates(ssl::context& ctx,
-                                   boost::system::error_code& ec)
-{
+                                   boost::system::error_code& ec) {
   detail::load_root_certificates(ctx, ec);
 }
 
-inline void load_root_certificates(ssl::context& ctx)
-{
+inline void load_root_certificates(ssl::context& ctx) {
   boost::system::error_code ec;
   detail::load_root_certificates(ctx, ec);
-  if (ec)
-    throw boost::system::system_error{ec};
+  if (ec) throw boost::system::system_error{ec};
 }
-#endif // INCLUDE_ROOTCERTIFICATES_HPP_
+#endif  // INCLUDE_ROOTCERTIFICATES_HPP_

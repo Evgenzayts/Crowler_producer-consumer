@@ -3,26 +3,26 @@
 #ifndef INCLUDE_CONSUMER_HPP_
 #define INCLUDE_CONSUMER_HPP_
 
-#include <fstream>
+#include <gumbo.h>
 #include <unistd.h>
+
+#include <fstream>
 #include <iostream>
 #include <string>
 
-#include <gumbo.h>
-
-#include "ThreadPool.hpp"
 #include "Queue.hpp"
+#include "ThreadPool.hpp"
 
 class Consumer {
  public:
   explicit Consumer(size_t& threads);
 
-  void Working(std::string &output_file, Queue& producer_queue);
-  void Write_in_file(std::string & output_file);
+  void Working(std::string& output_file, Queue& producer_queue);
+  void Write_in_file(std::string& output_file);
   void Search_for_images(GumboNode* node);
 
  private:
-  ThreadPool _threads_links; // для ссылок
+  ThreadPool _threads_links;  // для ссылок
   Queue _queue;
 };
 

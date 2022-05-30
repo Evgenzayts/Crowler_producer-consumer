@@ -3,12 +3,12 @@
 #ifndef INCLUDE_CRAWLER_HPP_
 #define INCLUDE_CRAWLER_HPP_
 
-#include <string>
-#include <iostream>
+#include <gumbo.h>
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/program_options.hpp>
-#include <gumbo.h>
+#include <iostream>
+#include <string>
 
 #include "Consumer.hpp"
 #include "Producer.hpp"
